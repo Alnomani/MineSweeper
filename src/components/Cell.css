@@ -1,0 +1,8 @@
+.cell {
+    display: inline-block;
+    background-color: antiquewhite;
+    border-right: 1px solid black;
+    width: 20px;
+    aspect-ratio: 1 / 1;
+    user-select: none;
+}

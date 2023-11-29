@@ -7,17 +7,23 @@ function App() {
     // const [count, setCount] = useState(0);
     const field = new BombMap(5, 5).getField();
     // field.map((row) => row.map((col) => <Cell visible={true} content={col} />));
-    // console.table(field);
+    console.table(field);
     return (
         <>
             <div className="field-container">
-                {field.map((row) => (
-                    <div className="row">
-                        {row.map((col) => (
-                            <Cell visible={true} content={col} />
-                        ))}
-                    </div>
-                ))}
+                {field.map(function (row, i) {
+                    return (
+                        <div className="row">
+                            {row.map((col, j) => (
+                                <Cell
+                                    key={i.toString() + j.toString()}
+                                    visible={true}
+                                    content={col}
+                                />
+                            ))}
+                        </div>
+                    );
+                })}
             </div>
         </>
     );
