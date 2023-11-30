@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./Field.css";
 import Cell from "./Cell";
-import IDict from "../IDict";
+import IDict from "../classes/IDict";
 
 interface Props {
     field: number[][];

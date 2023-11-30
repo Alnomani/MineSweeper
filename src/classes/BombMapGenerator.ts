@@ -1,5 +1,6 @@
 import IDict from "./IDict.js";
 import Vector2 from "./Vector2.js";
+import Queue from "./Queue";
 
 export default class BombMapGenerator {
     readonly bombFrequency: number = 1 / 6;
@@ -62,7 +63,7 @@ export default class BombMapGenerator {
         });
     }
 
-    public createVisbililityMatrix(): boolean[][] {
+    private createVisbililityMatrix(): boolean[][] {
         const visibilityMatrix: boolean[][] = [];
         for (let row = 0; row < this.field.length; row++) {
             visibilityMatrix[row] = [];
@@ -82,4 +83,14 @@ export default class BombMapGenerator {
         }
         return visibilityDict;
     }
+
+    // findConnectedComponents() {
+    //     const processed: boolean[][] = this.createVisbililityMatrix();
+    //     const firstQueue: Queue = new Queue();
+    //     const secondQueue: Queue = new Queue();
+    //     const listOfConnectedC: set[] = [];
+    //     for (let row = 0; row < this.field.length; row++) {
+    //         for (let col = 0; col < this.field[0].length; col++) {}
+    //     }
+    // }
 }

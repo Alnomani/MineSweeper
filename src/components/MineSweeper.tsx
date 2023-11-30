@@ -1,6 +1,6 @@
-import BombMapGenerator from "../BombMapGenerator";
+import BombMapGenerator from "../classes/BombMapGenerator";
 import Field from "./Field";
-import IDict from "../IDict";
+import IDict from "../classes/IDict";
 
 export default function MineSweeper() {
     const bombGenerator: BombMapGenerator = new BombMapGenerator(10, 10);
