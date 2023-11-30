@@ -1,6 +1,7 @@
+import IDict from "./IDict.js";
 import Vector2 from "./Vector2.js";
 
-export default class BombMap {
+export default class BombMapGenerator {
     readonly bombFrequency: number = 1 / 6;
     readonly bomb: number = -1;
     readonly empty: number = 0;
@@ -59,5 +60,26 @@ export default class BombMap {
                 }
             }
         });
+    }
+
+    public createVisbililityMatrix(): boolean[][] {
+        const visibilityMatrix: boolean[][] = [];
+        for (let row = 0; row < this.field.length; row++) {
+            visibilityMatrix[row] = [];
+            for (let col = 0; col < this.field[0].length; col++) {
+                visibilityMatrix[row][col] = false;
+            }
+        }
+        return visibilityMatrix;
+    }
+
+    public createVisbililityDict(): IDict {
+        const visibilityDict: IDict = {};
+        for (let row = 0; row < this.field.length; row++) {
+            for (let col = 0; col < this.field[0].length; col++) {
+                visibilityDict[row.toString() + col.toString()] = false;
+            }
+        }
+        return visibilityDict;
     }
 }
