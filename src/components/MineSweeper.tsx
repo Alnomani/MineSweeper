@@ -3,7 +3,7 @@ import Field from "./Field";
 import IDict from "../classes/IDict";
 
 export default function MineSweeper() {
-    const bombGenerator: BombMapGenerator = new BombMapGenerator(10, 10);
+    const bombGenerator: BombMapGenerator = new BombMapGenerator(5, 5);
     const field: number[][] = bombGenerator.getField();
     const visibilityDict: IDict = bombGenerator.createVisbililityDict();
 

@@ -12,7 +12,7 @@ function Cell({ position, visible, content, updateField }: Props) {
     if (content === -1) {
         realContent = "B";
     } else if (content === 0) {
-        realContent = " ";
+        realContent = "E";
     }
 
     const updateCell = function updateCell() {

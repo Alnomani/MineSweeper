@@ -18,7 +18,6 @@ export default class BombMapGenerator {
     ];
     readonly field: number[][];
     processed: boolean[][];
-    connectedComponentSets: Set<Vector2>[] = [];
 
     constructor(width: number, height: number) {
         this.field = this.createPlayingField(width, height);
@@ -92,78 +91,68 @@ export default class BombMapGenerator {
     }
 
     public findConnectedComponents(): Set<Vector2>[] {
-        console.table(this.field);
-        const cellQueue: Queue = new Queue();
+        const firstQueue: Queue = new Queue();
+        // const secondQueue: Queue = new Queue();
+        const listOfConnectedComponents: Set<Vector2>[] = [];
+        listOfConnectedComponents.push(new Set<Vector2>());
         let currentCell: number;
         let currentSetIndex: number = 0;
         for (let row = 0; row < this.field.length; row++) {
             for (let col = 0; col < this.field[0].length; col++) {
                 currentCell = this.field[row][col];
-                if (!this.processed[row][col]) {
-                    if (currentCell === 0) {
-                        this.connectedComponentSets.push(new Set<Vector2>());
-                        this.processEmptyCell(cellQueue, new Vector2(row, col));
-                        // cellQueue.printQueue();
-                        while (!cellQueue.isEmpty()) {
-                            let currentQueueLoc: Vector2 = cellQueue.dequeue();
-                            //console.log(currentQueueLoc);
-                            this.addEmptyNeighbors(currentQueueLoc, cellQueue);
-                            // console.log("Done with neighbors");
-                            // cellQueue.printQueue();
-                            // console.log(JSON.stringify(this.processed));
-                            // break;
-                        }
-                        currentSetIndex++;
-                        // console.log("finished section");
-                    } else {
-                        this.processed[row][col] = true;
+                if (!this.processed[row][col] && currentCell === 0) {
+                    console.table(this.field);
+                    console.log(
+                        `processing outside. ${row} ${col} ${!this.processed[
+                            row
+                        ][col]} ${currentCell === 0} ${currentCell}`
+                    );
+                    let currentLoc = new Vector2(row, col);
+                    this.processed[row][col] = true;
+                    listOfConnectedComponents.push(new Set<Vector2>());
+                    listOfConnectedComponents[currentSetIndex].add(currentLoc);
+                    console.log(JSON.stringify(this.processed));
+                    this.addEmptyNeighbors(currentLoc, firstQueue);
+                    firstQueue.printQueue();
+                    while (!firstQueue.isEmpty()) {
+                        let currentQueueLoc: Vector2 = firstQueue.dequeue();
+                        console.log(currentQueueLoc);
+                        this.processed[currentQueueLoc.x][currentQueueLoc.y] =
+                            true;
+                        listOfConnectedComponents[currentSetIndex].add(
+                            currentQueueLoc
+                        );
+                        this.addEmptyNeighbors(currentQueueLoc, firstQueue);
+                        firstQueue.printQueue();
                     }
+                    currentSetIndex++;
+                } else {
+                    this.processed[row][col] = true;
                 }
             }
         }
-        // console.log(JSON.stringify(this.processed));
-        return this.connectedComponentSets;
+        console.log(JSON.stringify(this.processed));
+        return listOfConnectedComponents;
     }
 
-    private processEmptyCell(cellQueue: Queue, location: Vector2) {
-        // console.log(
-        //     `Location in processEmptyCell: ${JSON.stringify(location)}`
-        // );
-        cellQueue.enqueue(location);
-        this.processed[location.x][location.y] = true;
-        // console.log(JSON.stringify(this.processed));
-        const len = this.connectedComponentSets.length;
-        this.connectedComponentSets[len - 1].add(location);
-    }
-
-    // console.table(this.field);
-    // console.log(
-    //     `processing outside. ${row} ${col} ${!this.processed[
-    //         row
-    //     ][col]} ${currentCell === 0} ${currentCell}`
-    // );
-
-    private addEmptyNeighbors(loc: Vector2, cellQueue: Queue) {
-        // console.log("processEmptyNeighbors");
+    private addEmptyNeighbors(loc: Vector2, firstQueue: Queue) {
         let currentNeighbor: Vector2;
         this.neighborVectors.forEach((neighborVector) => {
             currentNeighbor = loc.add(neighborVector);
             if (!this.outOfRange(currentNeighbor)) {
-                if (!this.processed[currentNeighbor.x][currentNeighbor.y]) {
-                    if (this.cellIsEmpty(currentNeighbor)) {
-                        this.processEmptyCell(cellQueue, currentNeighbor);
-                    } else {
-                        this.processed[currentNeighbor.x][currentNeighbor.y] =
-                            true;
-                    }
+                if (this.notProcessedAndEmpty(currentNeighbor)) {
+                    firstQueue.enqueue(currentNeighbor);
+                } else {
+                    this.processed[currentNeighbor.x][currentNeighbor.y] = true;
                 }
             }
         });
     }
 
-    private cellIsEmpty(currentLoc: Vector2): boolean {
+    private notProcessedAndEmpty(currentLoc: Vector2): boolean {
+        // console.log(currentLoc);
         const { x, y } = currentLoc;
-        return this.field[x][y] === this.empty;
+        return !this.processed[x][y] && this.field[x][y] === this.empty;
     }
 
     private outOfRange(location: Vector2) {
