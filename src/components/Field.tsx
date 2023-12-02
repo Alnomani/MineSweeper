@@ -60,10 +60,31 @@ export default function Field(props: Props) {
         return set;
     }
 
-    return (
-        <>
-            <div className="field-container">
-                {field.map(function (row, i) {
+    function mapRow(row: number[], i: number) {
+        return (
+            <div key={i.toString()} className="row">
+                {row.map(mapCol, { i: i })}
+            </div>
+        );
+    }
+
+    function mapCol(this: { i: number }, col: number, j: number) {
+        const strKey: string = this.i.toString() + j.toString();
+        return (
+            <Cell
+                key={strKey}
+                position={new Vector2(this.i, j)}
+                visible={visibilityDictState[strKey]}
+                content={col}
+                updateField={updateField}
+            />
+        );
+    }
+
+    return <div className="field-container">{field.map(mapRow)}</div>;
+}
+
+/*{ {field.map(function (row, i) {
                     return (
                         <div key={i.toString()} className="row">
                             {row.map((col, j) => (
@@ -81,8 +102,4 @@ export default function Field(props: Props) {
                             ))}
                         </div>
                     );
-                })}
-            </div>
-        </>
-    );
-}
+                })} }*/
