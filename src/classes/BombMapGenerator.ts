@@ -18,12 +18,12 @@ export default class BombMapGenerator {
     ];
     readonly field: number[][];
     processed: boolean[][];
-    connectedComponentSets: Set<Vector2>[] = [];
+    connectedComponentSets: Set<string>[] = [];
 
     constructor(width: number, height: number) {
         this.field = this.createPlayingField(width, height);
         this.processed = this.createBooleanMatrix();
-        console.log(this.findConnectedComponents());
+        console.log(this.findAllConnectedComponents());
     }
 
     public getField() {
@@ -91,8 +91,7 @@ export default class BombMapGenerator {
         return visibilityDict;
     }
 
-    public findConnectedComponents(): Set<Vector2>[] {
-        console.table(this.field);
+    public findAllConnectedComponents(): Set<string>[] {
         const cellQueue: Queue = new Queue();
         let currentCell: number;
         let currentSetIndex: number = 0;
@@ -101,7 +100,7 @@ export default class BombMapGenerator {
                 currentCell = this.field[row][col];
                 if (!this.processed[row][col]) {
                     if (currentCell === 0) {
-                        this.connectedComponentSets.push(new Set<Vector2>());
+                        this.connectedComponentSets.push(new Set<string>());
                         this.processEmptyCell(cellQueue, new Vector2(row, col));
                         // cellQueue.printQueue();
                         while (!cellQueue.isEmpty()) {
@@ -133,15 +132,8 @@ export default class BombMapGenerator {
         this.processed[location.x][location.y] = true;
         // console.log(JSON.stringify(this.processed));
         const len = this.connectedComponentSets.length;
-        this.connectedComponentSets[len - 1].add(location);
+        this.connectedComponentSets[len - 1].add(location.toString());
     }
-
-    // console.table(this.field);
-    // console.log(
-    //     `processing outside. ${row} ${col} ${!this.processed[
-    //         row
-    //     ][col]} ${currentCell === 0} ${currentCell}`
-    // );
 
     private addEmptyNeighbors(loc: Vector2, cellQueue: Queue) {
         // console.log("processEmptyNeighbors");

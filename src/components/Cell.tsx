@@ -1,10 +1,11 @@
+import Vector2 from "../classes/Vector2";
 import "./Cell.css";
 
 interface Props {
-    position: string;
+    position: Vector2;
     visible: boolean;
     content: number;
-    updateField: (location: string) => void;
+    updateField: (location: Vector2) => void;
 }
 
 function Cell({ position, visible, content, updateField }: Props) {

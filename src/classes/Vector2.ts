@@ -11,4 +11,7 @@ export default class Vector2 {
     public outOfRange(rowMax: number, colMax: number): boolean {
         return this.x < 0 || this.y < 0 || this.x >= rowMax || this.y >= colMax;
     }
+    public toString() {
+        return this.x.toString() + this.y.toString();
+    }
 }
