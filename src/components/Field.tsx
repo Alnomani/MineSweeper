@@ -8,16 +8,22 @@ interface Props {
     field: number[][];
     visibilityDict: IDict;
     connectedComponentSets: Set<string>[];
+    bombLocations: Vector2[];
 }
 
 export default function Field(props: Props) {
-    const { field, visibilityDict, connectedComponentSets } = props;
+    const { field, visibilityDict, connectedComponentSets, bombLocations } =
+        props;
     const [visibilityDictState, setVisibilityDict] = useState(visibilityDict);
+    const [gameOver, setGameOver] = useState(false);
 
     console.table(field);
     console.log("executed App");
     function updateField(location: Vector2) {
         const locationKey = location.toString();
+        if (gameOver) {
+            return;
+        }
         if (field[location.x][location.y] > 0) {
             setVisibilityDict({ ...visibilityDictState, [locationKey]: true });
         } else if (field[location.x][location.y] === 0) {
@@ -28,19 +34,22 @@ export default function Field(props: Props) {
                 connectedSet.forEach((locationKey) => {
                     locations[locationKey] = true;
                 });
-                console.log(locations);
                 setVisibilityDict({ ...visibilityDictState, ...locations });
             }
         } else {
             console.log("bomb found. ------------");
+            const locations: { [propName: string]: boolean } = {};
+            bombLocations.forEach((bombLocation) => {
+                locations[bombLocation.toString()] = true;
+            });
+            setVisibilityDict({ ...visibilityDictState, ...locations });
+            setGameOver(true);
         }
     }
 
     function getConnectedComponents(
         clickedLocation: string
     ): Set<string> | null {
-        console.log(clickedLocation);
-        console.log(connectedComponentSets);
         let set: Set<string> | null = null;
         connectedComponentSets.forEach((currentSet) => {
             if (currentSet.has(clickedLocation)) {

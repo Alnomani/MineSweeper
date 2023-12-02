@@ -11,9 +11,9 @@ interface Props {
 function Cell({ position, visible, content, updateField }: Props) {
     let realContent: string = content.toString();
     if (content === -1) {
-        realContent = "B";
+        realContent = "X";
     } else if (content === 0) {
-        realContent = "E";
+        realContent = " ";
     }
 
     const updateCell = function updateCell() {

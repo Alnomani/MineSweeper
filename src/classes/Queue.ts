@@ -28,7 +28,6 @@ export default class Queue {
     }
 
     isEmpty() {
-        // return Object.keys(this.items).length === 0;
         return this.backIndex === this.frontIndex;
     }
 

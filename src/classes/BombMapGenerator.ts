@@ -19,11 +19,13 @@ export default class BombMapGenerator {
     readonly field: number[][];
     processed: boolean[][];
     connectedComponentSets: Set<string>[] = [];
+    bombLocations: Vector2[];
 
     constructor(width: number, height: number) {
+        this.bombLocations = [];
         this.field = this.createPlayingField(width, height);
         this.processed = this.createBooleanMatrix();
-        console.log(this.findAllConnectedComponents());
+        this.findAllConnectedComponents();
     }
 
     public getField() {
@@ -34,20 +36,19 @@ export default class BombMapGenerator {
         console.log("creating field");
         const field: number[][] = [];
         let putBomb: boolean = false;
-        const bombLocations: Vector2[] = [];
         for (let row = 0; row < width; row++) {
             field[row] = [];
             for (let col = 0; col < height; col++) {
                 putBomb = Math.random() < this.bombFrequency;
                 if (putBomb) {
                     field[row][col] = this.bomb;
-                    bombLocations.push(new Vector2(row, col));
+                    this.bombLocations.push(new Vector2(row, col));
                 } else {
                     field[row][col] = this.empty;
                 }
             }
         }
-        this.addBombCounters(bombLocations, field);
+        this.addBombCounters(this.bombLocations, field);
         return field;
     }
 
@@ -91,7 +92,7 @@ export default class BombMapGenerator {
         return visibilityDict;
     }
 
-    public findAllConnectedComponents(): Set<string>[] {
+    public findAllConnectedComponents() {
         const cellQueue: Queue = new Queue();
         let currentCell: number;
         let currentSetIndex: number = 0;
@@ -102,41 +103,27 @@ export default class BombMapGenerator {
                     if (currentCell === 0) {
                         this.connectedComponentSets.push(new Set<string>());
                         this.processEmptyCell(cellQueue, new Vector2(row, col));
-                        // cellQueue.printQueue();
                         while (!cellQueue.isEmpty()) {
                             let currentQueueLoc: Vector2 = cellQueue.dequeue();
-                            //console.log(currentQueueLoc);
                             this.addEmptyNeighbors(currentQueueLoc, cellQueue);
-                            // console.log("Done with neighbors");
-                            // cellQueue.printQueue();
-                            // console.log(JSON.stringify(this.processed));
-                            // break;
                         }
                         currentSetIndex++;
-                        // console.log("finished section");
                     } else {
                         this.processed[row][col] = true;
                     }
                 }
             }
         }
-        // console.log(JSON.stringify(this.processed));
-        return this.connectedComponentSets;
     }
 
     private processEmptyCell(cellQueue: Queue, location: Vector2) {
-        // console.log(
-        //     `Location in processEmptyCell: ${JSON.stringify(location)}`
-        // );
         cellQueue.enqueue(location);
         this.processed[location.x][location.y] = true;
-        // console.log(JSON.stringify(this.processed));
         const len = this.connectedComponentSets.length;
         this.connectedComponentSets[len - 1].add(location.toString());
     }
 
     private addEmptyNeighbors(loc: Vector2, cellQueue: Queue) {
-        // console.log("processEmptyNeighbors");
         let currentNeighbor: Vector2;
         this.neighborVectors.forEach((neighborVector) => {
             currentNeighbor = loc.add(neighborVector);
@@ -147,6 +134,25 @@ export default class BombMapGenerator {
                     } else {
                         this.processed[currentNeighbor.x][currentNeighbor.y] =
                             true;
+                        const len = this.connectedComponentSets.length;
+                        this.connectedComponentSets[len - 1].add(
+                            currentNeighbor.toString()
+                        );
+                    }
+                } else if (
+                    this.processed[currentNeighbor.x][currentNeighbor.y]
+                ) {
+                    if (this.field[currentNeighbor.x][currentNeighbor.y] > 0) {
+                        const len = this.connectedComponentSets.length;
+                        if (
+                            !this.connectedComponentSets[len - 1].has(
+                                currentNeighbor.toString()
+                            )
+                        ) {
+                            this.connectedComponentSets[len - 1].add(
+                                currentNeighbor.toString()
+                            );
+                        }
                     }
                 }
             }
