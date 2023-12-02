@@ -18,12 +18,13 @@ export default class BombMapGenerator {
     ];
     readonly field: number[][];
     processed: boolean[][];
-    connectedComponentSets: Set<string>[] = [];
+    connectedSets: Set<string>[] = [];
     bombLocations: Vector2[];
 
     constructor(width: number, height: number) {
         this.bombLocations = [];
-        this.field = this.createPlayingField(width, height);
+        this.field = [];
+        this.populatePlayingField(width, height);
         this.processed = this.createBooleanMatrix();
         this.findAllConnectedComponents();
     }
@@ -32,40 +33,40 @@ export default class BombMapGenerator {
         return this.field;
     }
 
-    private createPlayingField(width: number, height: number): number[][] {
+    private populatePlayingField(width: number, height: number) {
         console.log("creating field");
-        const field: number[][] = [];
-        let putBomb: boolean = false;
         for (let row = 0; row < width; row++) {
-            field[row] = [];
+            this.field[row] = [];
             for (let col = 0; col < height; col++) {
-                putBomb = Math.random() < this.bombFrequency;
-                if (putBomb) {
-                    field[row][col] = this.bomb;
-                    this.bombLocations.push(new Vector2(row, col));
-                } else {
-                    field[row][col] = this.empty;
-                }
+                this.addCellContent(row, col);
             }
         }
-        this.addBombCounters(this.bombLocations, field);
-        return field;
+        this.addBombCounters(this.bombLocations);
     }
 
-    private addBombCounters(bombLocations: Vector2[], field: number[][]) {
+    private addCellContent(row: number, col: number) {
+        let putBomb: boolean = false;
+        putBomb = Math.random() < this.bombFrequency;
+        if (putBomb) {
+            this.field[row][col] = this.bomb;
+            this.bombLocations.push(new Vector2(row, col));
+        } else {
+            this.field[row][col] = this.empty;
+        }
+    }
+
+    private addBombCounters(bombLocations: Vector2[]) {
         bombLocations.forEach((bombLoc) => {
-            this.updateNeighborsOf(bombLoc, field);
+            this.updateNeighborsOf(bombLoc);
         });
-        return field;
     }
 
-    private updateNeighborsOf(loc: Vector2, field: number[][]) {
-        let currentNeighbor: Vector2;
+    private updateNeighborsOf(loc: Vector2) {
         this.neighborVectors.forEach((neighborVector) => {
-            currentNeighbor = loc.add(neighborVector);
-            if (!currentNeighbor.outOfRange(field.length, field[0].length)) {
-                if (field[currentNeighbor.x][currentNeighbor.y] !== this.bomb) {
-                    field[currentNeighbor.x][currentNeighbor.y] += 1;
+            let neighbor = loc.add(neighborVector);
+            if (!this.outOfRange(neighbor)) {
+                if (this.field[neighbor.x][neighbor.y] !== this.bomb) {
+                    this.field[neighbor.x][neighbor.y] += 1;
                 }
             }
         });
@@ -94,69 +95,63 @@ export default class BombMapGenerator {
 
     public findAllConnectedComponents() {
         const cellQueue: Queue = new Queue();
-        let currentCell: number;
-        let currentSetIndex: number = 0;
         for (let row = 0; row < this.field.length; row++) {
             for (let col = 0; col < this.field[0].length; col++) {
-                currentCell = this.field[row][col];
                 if (!this.processed[row][col]) {
-                    if (currentCell === 0) {
-                        this.connectedComponentSets.push(new Set<string>());
-                        this.processEmptyCell(cellQueue, new Vector2(row, col));
-                        while (!cellQueue.isEmpty()) {
-                            let currentQueueLoc: Vector2 = cellQueue.dequeue();
-                            this.addEmptyNeighbors(currentQueueLoc, cellQueue);
-                        }
-                        currentSetIndex++;
-                    } else {
-                        this.processed[row][col] = true;
-                    }
+                    this.processCurrentCell(cellQueue, row, col);
                 }
             }
+        }
+    }
+
+    private processCurrentCell(cellQueue: Queue, row: number, col: number) {
+        const currentCellContent = this.field[row][col];
+        if (currentCellContent === this.empty) {
+            this.connectedSets.push(new Set<string>());
+            this.processEmptyCell(cellQueue, new Vector2(row, col));
+            while (!cellQueue.isEmpty()) {
+                let currentQueueLoc: Vector2 = cellQueue.dequeue();
+                this.checkNeighbors(currentQueueLoc, cellQueue);
+            }
+        } else {
+            this.processed[row][col] = true;
         }
     }
 
     private processEmptyCell(cellQueue: Queue, location: Vector2) {
         cellQueue.enqueue(location);
         this.processed[location.x][location.y] = true;
-        const len = this.connectedComponentSets.length;
-        this.connectedComponentSets[len - 1].add(location.toString());
+        const len = this.connectedSets.length;
+        this.connectedSets[len - 1].add(location.toString());
     }
 
-    private addEmptyNeighbors(loc: Vector2, cellQueue: Queue) {
-        let currentNeighbor: Vector2;
+    private checkNeighbors(loc: Vector2, cellQueue: Queue) {
+        let neighbor: Vector2;
         this.neighborVectors.forEach((neighborVector) => {
-            currentNeighbor = loc.add(neighborVector);
-            if (!this.outOfRange(currentNeighbor)) {
-                if (!this.processed[currentNeighbor.x][currentNeighbor.y]) {
-                    if (this.cellIsEmpty(currentNeighbor)) {
-                        this.processEmptyCell(cellQueue, currentNeighbor);
+            neighbor = loc.add(neighborVector);
+            if (!this.outOfRange(neighbor)) {
+                if (!this.processed[neighbor.x][neighbor.y]) {
+                    if (this.cellIsEmpty(neighbor)) {
+                        this.processEmptyCell(cellQueue, neighbor);
                     } else {
-                        this.processed[currentNeighbor.x][currentNeighbor.y] =
-                            true;
-                        const len = this.connectedComponentSets.length;
-                        this.connectedComponentSets[len - 1].add(
-                            currentNeighbor.toString()
-                        );
+                        this.processed[neighbor.x][neighbor.y] = true;
+                        const len = this.connectedSets.length;
+                        this.connectedSets[len - 1].add(neighbor.toString());
                     }
-                } else if (
-                    this.processed[currentNeighbor.x][currentNeighbor.y]
-                ) {
-                    if (this.field[currentNeighbor.x][currentNeighbor.y] > 0) {
-                        const len = this.connectedComponentSets.length;
-                        if (
-                            !this.connectedComponentSets[len - 1].has(
-                                currentNeighbor.toString()
-                            )
-                        ) {
-                            this.connectedComponentSets[len - 1].add(
-                                currentNeighbor.toString()
-                            );
-                        }
-                    }
+                } else if (this.processed[neighbor.x][neighbor.y]) {
+                    this.addEdgeCell(neighbor);
                 }
             }
         });
+    }
+
+    private addEdgeCell(currentNeighbor: Vector2) {
+        if (this.field[currentNeighbor.x][currentNeighbor.y] > 0) {
+            const len = this.connectedSets.length;
+            if (!this.connectedSets[len - 1].has(currentNeighbor.toString())) {
+                this.connectedSets[len - 1].add(currentNeighbor.toString());
+            }
+        }
     }
 
     private cellIsEmpty(currentLoc: Vector2): boolean {

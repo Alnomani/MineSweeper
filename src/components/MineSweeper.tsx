@@ -6,8 +6,7 @@ export default function MineSweeper() {
     const bombGenerator: BombMapGenerator = new BombMapGenerator(10, 10);
     const field: number[][] = bombGenerator.getField();
     const visibilityDict: IDict = bombGenerator.createVisbililityDict();
-    const connectedComponentSets: Set<string>[] =
-        bombGenerator.connectedComponentSets;
+    const connectedComponentSets: Set<string>[] = bombGenerator.connectedSets;
 
     return (
         <Field
