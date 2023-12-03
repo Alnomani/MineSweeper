@@ -1,19 +1,41 @@
+import { useState } from "react";
 import BombMapGenerator from "../classes/BombMapGenerator";
 import Field from "./Field";
 import IDict from "../classes/IDict";
 
 export default function MineSweeper() {
-    const bombGenerator: BombMapGenerator = new BombMapGenerator(10, 10);
-    const field: number[][] = bombGenerator.getField();
-    const visibilityDict: IDict = bombGenerator.createVisbililityDict();
-    const connectedComponentSets: Set<string>[] = bombGenerator.connectedSets;
+    const [bombGenerator, setBombGenerator] = useState(
+        new BombMapGenerator(10, 10, 1 / 6)
+    );
+    const [visibilityDictState, setVisibilityDict] = useState(
+        bombGenerator.createVisbililityDict()
+    );
+    const [isGameOver, setIsGameOver] = useState(false);
+
+    // const field: number[][] = bombGenerator.getField();
+    // const visibilityDict: IDict = bombGenerator.createVisbililityDict();
+    // const connectedComponentSets: Set<string>[] = bombGenerator.connectedSets;
+    function startNewGame() {
+        setBombGenerator(new BombMapGenerator(10, 10, 1 / 6));
+        setVisibilityDict(bombGenerator.createVisbililityDict());
+        setIsGameOver(false);
+    }
+
+    function updateVisibilityDict(updatedDict: IDict) {
+        setVisibilityDict(updatedDict);
+    }
 
     return (
-        <Field
-            field={field}
-            visibilityDict={visibilityDict}
-            connectedComponentSets={connectedComponentSets}
-            bombLocations={bombGenerator.bombLocations}
-        />
+        <>
+            <Field
+                bombGenerator={bombGenerator}
+                visibilityDict={visibilityDictState}
+                isGameOver={isGameOver}
+                updateVisibilityDict={updateVisibilityDict}
+            />
+            <div className="button-container">
+                <button onClick={startNewGame}>New Game</button>
+            </div>
+        </>
     );
 }

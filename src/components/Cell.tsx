@@ -8,12 +8,17 @@ interface Props {
     updateField: (location: Vector2) => void;
 }
 
-function Cell({ position, visible, content, updateField }: Props) {
+export default function Cell(props: Props) {
+    const { position, visible, content, updateField } = props;
     let realContent: string = content.toString();
+    let cellClass = "normal-cell";
     if (content === -1) {
         realContent = "X";
     } else if (content === 0) {
         realContent = " ";
+        if (visible) {
+            cellClass = "empty-cell";
+        }
     }
 
     const updateCell = function updateCell() {
@@ -21,12 +26,8 @@ function Cell({ position, visible, content, updateField }: Props) {
     };
 
     return (
-        <>
-            <div className="cell" onClick={updateCell}>
-                {visible && realContent}
-            </div>
-        </>
+        <div className={cellClass} onClick={updateCell}>
+            {visible && realContent}
+        </div>
     );
 }
-
-export default Cell;

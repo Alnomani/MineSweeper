@@ -3,9 +3,14 @@ import Vector2 from "./Vector2.js";
 import Queue from "./Queue";
 
 export default class BombMapGenerator {
-    readonly bombFrequency: number = 1 / 6;
+    readonly bombFrequency: number;
     readonly bomb: number = -1;
     readonly empty: number = 0;
+    readonly field: number[][];
+    readonly processed: boolean[][];
+    readonly connectedSets: Set<string>[] = [];
+    readonly bombLocations: Vector2[];
+
     readonly neighborVectors: Vector2[] = [
         new Vector2(1, 0),
         new Vector2(-1, 0),
@@ -16,12 +21,9 @@ export default class BombMapGenerator {
         new Vector2(1, -1),
         new Vector2(-1, -1),
     ];
-    readonly field: number[][];
-    processed: boolean[][];
-    connectedSets: Set<string>[] = [];
-    bombLocations: Vector2[];
 
-    constructor(width: number, height: number) {
+    constructor(width: number, height: number, bombFrequency: number) {
+        this.bombFrequency = bombFrequency;
         this.bombLocations = [];
         this.field = [];
         this.populatePlayingField(width, height);
