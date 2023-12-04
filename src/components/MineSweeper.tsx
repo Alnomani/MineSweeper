@@ -12,9 +12,6 @@ export default function MineSweeper() {
     );
     const [isGameOver, setIsGameOver] = useState(false);
 
-    // const field: number[][] = bombGenerator.getField();
-    // const visibilityDict: IDict = bombGenerator.createVisbililityDict();
-    // const connectedComponentSets: Set<string>[] = bombGenerator.connectedSets;
     function startNewGame() {
         setBombGenerator(new BombMapGenerator(10, 10, 1 / 6));
         setVisibilityDict(bombGenerator.createVisbililityDict());

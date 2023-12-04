@@ -1,8 +1,10 @@
 .normal-cell {
-    display: inline-block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background-color: beige;
     border-right: 1px solid black;
-    width: 20px;
+    width: 23px;
     aspect-ratio: 1 / 1;
     user-select: none;
 }
@@ -11,7 +13,8 @@
     display: inline-block;
     background-color: lightblue;
     border-right: 1px solid black;
-    width: 20px;
+    width: 23px;
     aspect-ratio: 1 / 1;
     user-select: none;
+    text-align: center;
 }

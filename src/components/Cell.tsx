@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Vector2 from "../classes/Vector2";
 import "./Cell.css";
 
@@ -10,10 +11,14 @@ interface Props {
 
 export default function Cell(props: Props) {
     const { position, visible, content, updateField } = props;
+    const [putMarker, setPutMarker] = useState(false);
+    // prettier-ignore
+    const marker: string= "🚩";
+
     let realContent: string = content.toString();
     let cellClass = "normal-cell";
     if (content === -1) {
-        realContent = "X";
+        realContent = "💣";
     } else if (content === 0) {
         realContent = " ";
         if (visible) {
@@ -25,9 +30,22 @@ export default function Cell(props: Props) {
         updateField(position);
     };
 
+    const placeFlag = (event: React.MouseEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        console.log(`right clicked on cell ${position}`);
+        if (!visible) {
+            setPutMarker(!putMarker);
+        }
+    };
+
     return (
-        <div className={cellClass} onClick={updateCell}>
+        <div
+            className={cellClass}
+            onClick={updateCell}
+            onContextMenu={placeFlag}
+        >
             {visible && realContent}
+            {!visible && putMarker && marker}
         </div>
     );
 }
