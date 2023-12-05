@@ -3,44 +3,51 @@ import Cell from "./Cell";
 import IDict from "../classes/IDict";
 import Vector2 from "../classes/Vector2";
 import BombMapGenerator from "../classes/BombMapGenerator";
+import { useState } from "react";
 
-// interface Props {
-//     field: number[][];
-//     visibilityDict: IDict;
-//     connectedCellsSets: Set<string>[];
-//     bombLocations: Vector2[];
-// }
 interface Props {
     bombGenerator: BombMapGenerator;
     visibilityDict: IDict;
-    isGameOver: boolean;
     updateVisibilityDict: (dict: IDict) => void;
 }
 
 export default function Field(props: Props) {
-    const { bombGenerator, visibilityDict, isGameOver, updateVisibilityDict } =
-        props;
+    const { bombGenerator, visibilityDict, updateVisibilityDict } = props;
     const field: number[][] = bombGenerator.getField();
     const connectedCellsSets: Set<string>[] = bombGenerator.connectedSets;
     const bombLocations: Vector2[] = bombGenerator.bombLocations;
 
     // const [visibilityDictState, setVisibilityDict] = useState(visibilityDict);
-    // const [isGameOver, setIsGameOver] = useState(false);
+    const [isGameOver, setIsGameOver] = useState(false);
 
     // console.table(field);
     console.log("executed App");
     function updateField(location: Vector2) {
         const locationKey = location.toString();
+        let newDict: IDict = {};
         if (isGameOver) {
+            alert("Game Over!");
             return;
         }
 
         if (field[location.x][location.y] > 0) {
-            updateVisibilityDict({ ...visibilityDict, [locationKey]: true });
+            newDict = { ...visibilityDict, [locationKey]: true };
+            updateVisibilityDict(newDict);
+            checkAndHandleWin(newDict);
         } else if (field[location.x][location.y] === 0) {
             handleEmptyCellClick(locationKey);
         } else {
             handleBombClick();
+        }
+    }
+
+    function checkAndHandleWin(localVisibilityDict: IDict) {
+        const numUnrevealedCells = Object.values(localVisibilityDict).filter(
+            (value) => !value
+        ).length;
+        if (bombLocations.length === numUnrevealedCells) {
+            alert("Congratulations! You won!");
+            setIsGameOver(true);
         }
     }
 
@@ -52,7 +59,9 @@ export default function Field(props: Props) {
             connectedSet.forEach((locationKey) => {
                 locations[locationKey] = true;
             });
-            updateVisibilityDict({ ...visibilityDict, ...locations });
+            const newDict: IDict = { ...visibilityDict, ...locations };
+            updateVisibilityDict(newDict);
+            checkAndHandleWin(newDict);
         }
     }
 
@@ -63,7 +72,7 @@ export default function Field(props: Props) {
             locations[bombLocation.toString()] = true;
         });
         updateVisibilityDict({ ...visibilityDict, ...locations });
-        // setIsGameOver(true);
+        setIsGameOver(true);
     }
 
     function getConnectedCellSet(clickedLocation: string): Set<string> | null {

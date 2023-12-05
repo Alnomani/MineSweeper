@@ -10,12 +10,12 @@ export default function MineSweeper() {
     const [visibilityDictState, setVisibilityDict] = useState(
         bombGenerator.createVisbililityDict()
     );
-    const [isGameOver, setIsGameOver] = useState(false);
+    const [gameId, setGameId] = useState(Math.random() * 1000);
 
     function startNewGame() {
         setBombGenerator(new BombMapGenerator(10, 10, 1 / 6));
         setVisibilityDict(bombGenerator.createVisbililityDict());
-        setIsGameOver(false);
+        setGameId(Math.random() * 1000);
     }
 
     function updateVisibilityDict(updatedDict: IDict) {
@@ -25,9 +25,9 @@ export default function MineSweeper() {
     return (
         <>
             <Field
+                key={gameId}
                 bombGenerator={bombGenerator}
                 visibilityDict={visibilityDictState}
-                isGameOver={isGameOver}
                 updateVisibilityDict={updateVisibilityDict}
             />
             <div className="button-container">
